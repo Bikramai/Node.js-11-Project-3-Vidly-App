@@ -1,8 +1,9 @@
- const {Movie} = require('../models/movie'); 
+const {Movie} = require('../models/movie'); 
 const {Customer} = require('../models/customer'); 
 const {Rental, validate} = require('../models/rental');
 const mongoose = require('mongoose');
 const express = require('express');
+const Fawn = require('fawn/lib/fawn');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -34,12 +35,25 @@ router.post('/', async (req, res) => {
       dailyRentalRate: movie.dailyRentalRate
     }
   });
-  rental = await rental.save();
-
-  movie.numberInStock--;
-  movie.save();
   
-  res.send(rental);
+  // Transactions 
+  try {
+    new Fawn.Task()
+      .save('rentals', rental)
+      .update('movies', { _id: movie._id }, {
+        $inc: { numberInStock: -1 }
+      })
+      .run();
+    // rental = await rental.save();
+  
+    // movie.numberInStock--;
+    // movie.save();
+    
+    res.send(rental);
+  }
+  catch(ex) {
+    res.status(500).send('Something failed.');
+  }
 });
 
 router.get('/:id', async (req, res) => {
