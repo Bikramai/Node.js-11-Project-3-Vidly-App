@@ -1,7 +1,6 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
 
-// Define model and genre Schema together
 
 const User = mongoose.model('User', new mongoose.Schema({
     name: {
@@ -25,14 +24,24 @@ const User = mongoose.model('User', new mongoose.Schema({
     }
 }));
 
+// function validateUser(user) { // This code me took to figure out a week!!!
+//     const schema = {
+//         name: Joi.string().min(5).max(50).required(),
+//         email: Joi.string().min(5).max(255).required().email(),
+//         password:Joi.string().max(255).required()
+//     };
+
+//     return Joi.validate(user, schema);
+// }
+
 function validateUser(user) {
-    const schema = {
+    const schema = Joi.object({
         name: Joi.string().min(5).max(50).required(),
         email: Joi.string().min(5).max(255).required().email(),
-        password: Joi.string().min(5).max(255).required(),
-    };
+        password: Joi.string().min(5).max(255).required()
+    });
 
-    return Joi.validate(user, schema);
+    return schema.validate(user);
 }
 
 exports.User = User;
