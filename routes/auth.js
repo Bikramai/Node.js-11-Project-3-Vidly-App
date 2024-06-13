@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
@@ -16,16 +17,18 @@ router.post('/', async (req, res) => {
    const validPassword = await bcrypt.compare(req.body.password, user.password);
    if (!validPassword) return res.status(400).send('Invalid email or password.');
 
-   res.send(true);
+   const token = jwt.sign({ _id: user._id }, 'jwtPrivateKey'); //generate token jwt 
+
+   res.send(token);
 });
 
-function validateGenre(genre) {
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
+// function validateGenre(genre) {
+//     const schema = {
+//         name: Joi.string().min(3).required()
+//     };
 
-    return Joi.validate(genre, schema);
-}
+//     return Joi.validate(genre, schema);
+// }
 
 function validate(req) {
     const schema = Joi.object({
