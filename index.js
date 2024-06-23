@@ -15,8 +15,16 @@ const auth = require('./routes/auth')
 const express = require('express');
 const app = express();
 
+process.on('uncaughtException', (ex) => {
+    console.log('WE GOT AN UNCOUGHT EXCEPTION');
+    winston.error(ex.message, ex);
+});
+
 winston.add(winston.transports.File, { filename: 'logfile.log' });
-winston.add(winston.transports.MongoDB, { db: 'mongodb://localhost/vidly' });
+winston.add(winston.transports.MongoDB, { 
+    db: 'mongodb://localhost/vidly',
+    level: 'info'
+ });
 
 if (!config.get('jwtPrivateKey')) {
     console.error('FATEL ERROR: jwtPrivate is not defined.');
