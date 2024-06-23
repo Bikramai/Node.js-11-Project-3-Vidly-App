@@ -15,9 +15,11 @@ const auth = require('./routes/auth')
 const express = require('express');
 const app = express();
 
-process.on('uncaughtException', (ex) => {
-    console.log('WE GOT AN UNCOUGHT EXCEPTION');
-    winston.error(ex.message, ex);
+winston.handleExceptions(
+    new winston.transports.File({ filename: 'uncoghtExceptions.log'}))
+
+process.on('unhandleRejection', (ex) => {
+    throw ex;
 });
 
 winston.add(winston.transports.File, { filename: 'logfile.log' });
@@ -25,6 +27,9 @@ winston.add(winston.transports.MongoDB, {
     db: 'mongodb://localhost/vidly',
     level: 'info'
  });
+
+ const p = Promise.reject(new Error('Something failed misserably!'));
+ p.then(() => console.log('Done'));
 
 if (!config.get('jwtPrivateKey')) {
     console.error('FATEL ERROR: jwtPrivate is not defined.');
